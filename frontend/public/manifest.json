@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "MiaoNance",
+  "name": "A smart notebook for crypto investors.",
   "icons": [
     {
       "src": "favicon.ico",
