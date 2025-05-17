@@ -33,7 +33,7 @@ export default function LoginPage() {
 
       <form
         onSubmit={handleLogin}
-        className="bg-white text-black dark:bg-[#1F1F1F] dark:text-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
+        className="bg-white text-black dark:bg-[#111111] dark:text-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
       >
         <h4 className="text-2xl">Welcome!</h4>
         <h2 className="mb-2 font-bold">Sign in</h2>
