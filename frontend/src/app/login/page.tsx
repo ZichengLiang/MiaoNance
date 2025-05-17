@@ -2,6 +2,14 @@
 import Footer from "@/components/Footer";
 import SocialLogin from "@/components/SocialLogin";
 
+import { Poppins } from 'next/font/google';
+
+const poppins = Poppins({
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+});
+
 
 import { useState } from 'react';
 
@@ -19,22 +27,19 @@ export default function LoginPage() {
   };
 
   return (
-  <>
-   <div 
-   style={{ 
-    backgroundImage: "url('/dark_mode_bg.png')",
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',}} 
-   className="min-h-screen w-full flex justify-center items-center"
-   >
-      <form onSubmit={handleLogin} className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
-        style={{ backgroundColor: '#1F1F1F', color: 'white' }}      
+    <div
+    className={`${poppins.variable} font-poppins min-h-screen w-full flex justify-center items-center bg-[url('/light_mode_bg.png')] dark:bg-[url('/darker_contrasted_bg.png')] bg-cover bg-center`}
+    >
+
+      <form
+        onSubmit={handleLogin}
+        className="bg-white text-black dark:bg-[#1F1F1F] dark:text-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
       >
         <h4 className="text-2xl">Welcome!</h4>
         <h2 className="mb-2 font-bold">Sign in</h2>
 
         <div className="mb-4">
-          <label className="block text-white text-sm mb-2">Email</label>
+          <label className="block text-black dark:text-white text-sm mb-2">Email</label>
           <input
             type="email"
             placeholder="Enter your Email Address"
@@ -49,7 +54,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-white text-sm mb-2">Password</label>
+          <label className="block text-black dark:text-white text-sm mb-2">Password</label>
           <input
             type="password"
             placeholder="Enter your Password"
@@ -82,9 +87,9 @@ export default function LoginPage() {
         <SocialLogin/>
 
 
-        <div className="mt-10 text-center text-sm text-gray-500">
+        <div className="mt-10 text-center text-black font-thin text-sm dark:text-gray-500 dark:font-bold">
             Don’t have an Account?{' '}
-            <a href="#" className="text-white hover:underline">
+            <a href="#" className="font-bold text-black dark:text-white hover:underline">
                 Register
             </a>
         </div>
@@ -92,7 +97,5 @@ export default function LoginPage() {
 
       </form>
     </div>
-    <Footer />
-  </>
   );
 }
