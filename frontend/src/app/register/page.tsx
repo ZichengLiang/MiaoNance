@@ -1,9 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import Footer from '@/components/Footer';
-import SocialAuth from '@/components/SocialAuth';
 import { Poppins } from 'next/font/google';
+import SocialAuth from '@/components/SocialAuth';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -11,16 +10,41 @@ const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
 });
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState({ email: '', password: '' });
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState({ email: '', password: '', confirm: '' });
+
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Logging in:', { email, password });
-    // TODO: hit login API and handle error/redirect
+
+    let hasError = false;
+    const newErrors = { email: '', password: '', confirm: '' };
+
+    if (!email.includes('@')) {
+      newErrors.email = 'Invalid email';
+      hasError = true;
+    }
+
+    if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+      hasError = true;
+    }
+
+    if (password !== confirmPassword) {
+      newErrors.confirm = 'Passwords do not match';
+      hasError = true;
+    }
+
+    setError(newErrors);
+
+    if (!hasError) {
+      console.log('Registering:', { email, password });
+      // TODO: Call register API
+    }
   };
 
   return (
@@ -28,11 +52,11 @@ export default function LoginPage() {
       className={`${poppins.variable} font-poppins min-h-screen w-full flex justify-center items-center bg-[url('/light_mode_bg.png')] dark:bg-[url('/darker_contrasted_bg.png')] bg-cover bg-center`}
     >
       <form
-        onSubmit={handleLogin}
+        onSubmit={handleRegister}
         className="bg-white text-black dark:bg-[#111111] dark:text-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
       >
-        <h4 className="text-2xl">Welcome!</h4>
-        <h2 className="mb-2 font-bold">Sign in</h2>
+        <h4 className="text-2xl">Sign Up!</h4>
+         <h2 className="mb-2 font-bold">Create your account</h2>
 
         {/* Email Field */}
         <div className="mb-4">
@@ -75,31 +99,41 @@ export default function LoginPage() {
           {error.password && <p className="text-red-500 text-xs mt-1">{error.password}</p>}
         </div>
 
-        {/* Options */}
-        <div className="flex items-center justify-between mb-4">
-          <label className="flex items-center text-sm">
-            <input type="checkbox" className="mr-2" /> Remember me
-          </label>
-          <a href="#" className="text-sm text-blue-500 hover:underline">Forgot Password?</a>
+        {/* Confirm Password Field */}
+        <div className="mb-8">
+          <label className="block text-black dark:text-white text-sm mb-2">Re-Enter Password</label>
+          <div className="relative">
+            <input
+              type={'password'}
+              placeholder="Re-enter your Password"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError((prev) => ({ ...prev, confirm: '' }));
+              }}
+              className="w-full px-3 py-2 border rounded pr-10"
+            />
+          </div>
+          {error.confirm && <p className="text-red-500 text-xs mt-1">{error.confirm}</p>}
         </div>
 
-        {/* Login Button */}
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-900"
         >
-          Login
+          Register
         </button>
 
         {/* Social Auth */}
         <div className="mt-6 text-center text-sm text-gray-400">or continue with</div>
-        <SocialAuth mode="login" />
+        <SocialAuth mode="register" />
 
-        {/* Link to Register */}
+        {/* Link to Login */}
         <div className="mt-10 text-center text-black font-thin text-sm dark:text-gray-500 dark:font-bold">
-          Don’t have an Account?{' '}
-          <a href="/register" className="font-bold text-black dark:text-white hover:underline">
-            Register
+          Already have an account?{' '}
+          <a href="/login" className="font-bold text-black dark:text-white hover:underline">
+            Login
           </a>
         </div>
       </form>
