@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const isDisabled = !email || !password;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,10 +86,15 @@ export default function LoginPage() {
 
         {/* Login Button */}
         <button
-          type="submit"
-          className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-900"
+        type="submit"
+        disabled={isDisabled}
+        className={`w-full py-2 px-4 rounded transition
+            ${isDisabled
+            ? 'bg-gray-400 cursor-not-allowed text-white'
+            : 'bg-black text-white hover:bg-gray-900 shadow-none transition-shadow duration-150 cursor-pointer hover:shadow-md hover:shadow-black'
+            }`}
         >
-          Login
+        Login
         </button>
 
         {/* Social Auth */}

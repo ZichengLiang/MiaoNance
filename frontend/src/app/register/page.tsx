@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState({ email: '', password: '', confirm: '' });
+  const isDisabled = !email || !password || !confirmPassword;
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -119,10 +120,15 @@ export default function RegisterPage() {
 
         {/* Submit Button */}
         <button
-          type="submit"
-          className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-900"
+        type="submit"
+        disabled={isDisabled}
+        className={`w-full py-2 px-4 rounded transition
+            ${isDisabled
+            ? 'bg-gray-400 cursor-not-allowed text-white'
+            : 'bg-black text-white hover:bg-gray-900 shadow-none transition-shadow duration-150 cursor-pointer hover:shadow-md hover:shadow-black'
+            }`}
         >
-          Register
+        Register
         </button>
 
         {/* Social Auth */}
