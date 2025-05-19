@@ -1,13 +1,20 @@
 import React from "react";
+import {Card, CardContent, CardActionArea, Typography} from '@mui/material';
+import { Notebook } from "@/types/notebook";
 
-export default function NoteCard() {
+export default function NoteCard({notebook}) {
   return (
-    <div className="border rounded-xl border-amber-400 hover:shadow-xs">
-      <div className="p-6 content-center">Notebook Title</div>
-      <div className="flex flex-row gap-6 p-2">
-        <div>Created at: 2025-05-15</div>
-        <div>ETH/BTC</div>
-      </div>
-    </div>
+    <Card sx={{ maxWidth: 345 }}>
+      <CardActionArea href={`${notebook.uuid}`}>
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div">
+            {notebook.title}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            {notebook.createdAt.toLocaleDateString()}
+          </Typography>
+        </CardContent> 
+      </CardActionArea>
+    </Card>
   );
 }
