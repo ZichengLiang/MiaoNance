@@ -26,8 +26,9 @@ export default function LoginPage() {
 
   return (
     <div
-      className={`${poppins.variable} font-poppins min-h-screen w-full flex justify-center items-center bg-[url('/light_mode_bg.png')] dark:bg-[url('/darker_contrasted_bg.png')] bg-cover bg-center`}
+      className={`${poppins.variable} font-poppins min-h-screen w-full flex flex-col justify-between bg-[url('/light_mode_bg.png')] dark:bg-[url('/darker_contrasted_bg.png')] bg-cover bg-center`}
     >
+    <div className="flex-grow flex justify-center items-center">
       <form
         onSubmit={handleLogin}
         className="bg-white text-black dark:bg-[#111111] dark:text-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
@@ -116,6 +117,8 @@ export default function LoginPage() {
           </a>
         </div>
       </form>
+      </div>
+      <Footer />
     </div>
   );
 }

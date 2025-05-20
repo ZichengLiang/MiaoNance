@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Poppins } from 'next/font/google';
 import SocialAuth from '@/components/SocialAuth';
+import Footer from '@/components/Footer';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -51,8 +52,9 @@ export default function RegisterPage() {
 
   return (
     <div
-      className={`${poppins.variable} font-poppins min-h-screen w-full flex justify-center items-center bg-[url('/light_mode_bg.png')] dark:bg-[url('/darker_contrasted_bg.png')] bg-cover bg-center`}
+      className={`${poppins.variable} font-poppins min-h-screen w-full flex flex-col justify-between bg-[url('/light_mode_bg.png')] dark:bg-[url('/darker_contrasted_bg.png')] bg-cover bg-center`}
     >
+      <div className="flex-grow flex justify-center items-center">
       <form
         onSubmit={handleRegister}
         className="bg-white text-black dark:bg-[#111111] dark:text-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
@@ -162,6 +164,8 @@ export default function RegisterPage() {
           </a>
         </div>
       </form>
+      </div>
+      <Footer />
     </div>
   );
 }
