@@ -53,29 +53,35 @@ export default function LoginPage() {
 
         {/* Password Field */}
         <div className="mb-4">
-          <label className="block text-black dark:text-white text-sm mb-2">Password</label>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Enter your Password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError((prev) => ({ ...prev, password: '' }));
-              }}
-              className="w-full px-3 py-2 border rounded pr-10"
-            />
+        <label className="block text-black dark:text-white text-sm mb-2">Password</label>
+        <div className="relative">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Enter your Password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError((prev) => ({ ...prev, password: '' }));
+            }}
+            className="w-full px-3 py-2 pr-10 border rounded"
+          />
+
+          <div className="absolute inset-y-0 right-3 flex items-center group">
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              title={showPassword ? 'Hide password' : 'Show password'}
+              className="text-gray-500 hover:text-gray-700"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
+            <div className="absolute bottom-full mb-1 right-0 w-max px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+              {showPassword ? 'Hide password' : 'Show password'}
+            </div>
           </div>
-          {error.password && <p className="text-red-500 text-xs mt-1">{error.password}</p>}
         </div>
+        {error.password && <p className="text-red-500 text-xs mt-1">{error.password}</p>}
+      </div>
+
 
         {/* Options */}
         <div className="flex items-center justify-between mb-4">
