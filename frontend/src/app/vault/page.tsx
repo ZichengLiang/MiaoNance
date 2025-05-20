@@ -12,7 +12,7 @@ export default function Page() {
     <div className="relative">
       <Header />
       <VaultControl notebooks={notebooks} setNotebooks={setNotebooks}/>
-      <NoteCardWrapper notebooks={notebooks}/>
+      <NoteCardWrapper notebooks={notebooks} setNotebooks={setNotebooks}/>
       <Footer />
     </div>
   );
