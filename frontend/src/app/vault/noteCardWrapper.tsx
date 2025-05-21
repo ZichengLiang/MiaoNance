@@ -1,10 +1,10 @@
 import React from "react";
 import NoteCard from "./noteCard";
-import { Notebook } from "@/types/notebook";
+import { NotebookMetadata } from "@/types/notebook_metadata";
 
 interface NoteCardWrapperProps {
-  notebooks: Notebook[];
-  setNotebooks: React.Dispatch<React.SetStateAction<Notebook[]>>;
+  notebooks: NotebookMetadata[];
+  setNotebooks: React.Dispatch<React.SetStateAction<NotebookMetadata[]>>;
 }
 
 export default function NoteCardWrapper({
@@ -13,7 +13,7 @@ export default function NoteCardWrapper({
 }: NoteCardWrapperProps) {
   return (
     <div className="mx-32 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {notebooks.map((notebook: Notebook) => (
+      {notebooks.map((notebook: NotebookMetadata) => (
         <NoteCard
           key={crypto.randomUUID()}
           notebook={notebook}

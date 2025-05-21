@@ -9,20 +9,30 @@ import {
   Tooltip,
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
-import { Notebook } from "@/types/notebook";
+import { NotebookMetadata } from "@/types/notebook_metadata";
 
-interface NoteCardProps{
-  notebook: Notebook;
-  notebooks: Notebook[];
+interface NoteCardProps {
+  notebook: NotebookMetadata;
+  notebooks: NotebookMetadata[];
   // the type React.Dispatch... is used for React setState(), it allows both direct state updates and functional updates.
-  setNotebooks: React.Dispatch<React.SetStateAction<Notebook[]>>;
+  setNotebooks: React.Dispatch<React.SetStateAction<NotebookMetadata[]>>;
 }
 
-export default function NoteCard({ notebook, setNotebooks }: NoteCardProps) {
-  const [notebookTitle, setTitle] = React.useState(notebook.title)
+export default function NoteCard({
+  notebook,
+  notebooks,
+  setNotebooks,
+}: NoteCardProps) {
+  const [notebookTitle, setTitle] = React.useState(notebook.title);
 
-  function handleEditTitle() {
-    return ;
+  function handleEditTitle(notebook: NotebookMetadata) {
+    // TODO: instead of UUID, let user type its name
+    setTitle(notebook.uuid);
+    notebook.title = notebook.uuid;
+  }
+
+  function handleDelete(notebook: NotebookMetadata) {
+    setNotebooks(notebooks.filter((item) => item.uuid !== notebook.uuid));
   }
 
   return (
@@ -39,13 +49,17 @@ export default function NoteCard({ notebook, setNotebooks }: NoteCardProps) {
       </CardActionArea>
       <CardActions>
         <Tooltip title="Rename this notebook" placement="bottom">
-          <Button size="small" color="primary" onClick={() => {handleEditTitle()}}>
-            <Edit/>
+          <Button size="small" color="primary" onClick={() => handleEditTitle(notebook)}>
+            <Edit />
           </Button>
         </Tooltip>
         <Tooltip title="Delete this notebook" placement="bottom">
-          <Button size="small" color="primary">
-            <Delete/>
+          <Button
+            size="small"
+            color="primary"
+            onClick={() => handleDelete(notebook)}
+          >
+            <Delete />
           </Button>
         </Tooltip>
       </CardActions>

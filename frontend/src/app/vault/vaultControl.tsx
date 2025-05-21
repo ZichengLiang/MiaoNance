@@ -1,22 +1,25 @@
 import { Button } from "@mui/material";
 import React from "react";
-import { Notebook } from "@/types/notebook";
+import { NotebookMetadata } from "@/types/notebook_metadata";
 
 interface VaultControlProps {
-  notebooks: Notebook[];
+  notebooks: NotebookMetadata[];
   // the type React.Dispatch... is used for React setState(), it allows both direct state updates and functional updates.
-  setNotebooks: React.Dispatch<React.SetStateAction<Notebook[]>>;
+  setNotebooks: React.Dispatch<React.SetStateAction<NotebookMetadata[]>>;
 }
 
-export default function VaultControl({ notebooks, setNotebooks }: VaultControlProps) {
+export default function VaultControl({
+  notebooks,
+  setNotebooks,
+}: VaultControlProps) {
   function handleAddNotebook() {
     const timestamp = Date.now();
-    const newNotebook = {
+    const newNotebookMetadata = {
       title: "untitled",
       createdAt: new Date(timestamp),
       uuid: crypto.randomUUID(),
     };
-    const newArr: Notebook[] = [...notebooks, newNotebook];
+    const newArr: NotebookMetadata[] = [...notebooks, newNotebookMetadata];
     setNotebooks(newArr);
   }
   return (

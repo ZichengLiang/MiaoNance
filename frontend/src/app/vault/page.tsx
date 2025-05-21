@@ -4,15 +4,15 @@ import Footer from "@/components/Footer";
 import React from "react";
 import NoteCardWrapper from "./noteCardWrapper";
 import VaultControl from "./vaultControl";
-import { Notebook } from "@/types/notebook";
+import { NotebookMetadata } from "@/types/notebook_metadata";
 
 export default function Page() {
-  const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
+  const [notebooks, setNotebooks] = React.useState<NotebookMetadata[]>([]);
   return (
     <div className="relative">
       <Header />
-      <VaultControl notebooks={notebooks} setNotebooks={setNotebooks}/>
-      <NoteCardWrapper notebooks={notebooks} setNotebooks={setNotebooks}/>
+      <VaultControl notebooks={notebooks} setNotebooks={setNotebooks} />
+      <NoteCardWrapper notebooks={notebooks} setNotebooks={setNotebooks} />
       <Footer />
     </div>
   );
