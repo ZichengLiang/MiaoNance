@@ -10,10 +10,8 @@ export default function Page() {
   const [notebooks, setNotebooks] = React.useState<NotebookMetadata[]>([]);
   return (
     <div className="relative">
-      <Header />
       <VaultControl notebooks={notebooks} setNotebooks={setNotebooks} />
       <NoteCardWrapper notebooks={notebooks} setNotebooks={setNotebooks} />
-      <Footer />
     </div>
   );
 }
