@@ -1,8 +1,7 @@
 import React, { JSXElementConstructor } from "react";
 
 interface PopupCardProps {
-    
-    variant:'delete' | 'edit'
+    variant:'delete' | 'edit';
 }
 
 function handleDeleteCard() {

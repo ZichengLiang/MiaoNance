@@ -24,12 +24,7 @@ export default function VaultControl({
   }
   return (
     <div className="mx-32 pb-6 pt-3">
-      <Button
-        variant="outlined"
-        onClick={() => {
-          handleAddNotebook();
-        }}
-      >
+      <Button variant="outlined" onClick={handleAddNotebook}>
         Add a new notebook
       </Button>
     </div>

@@ -37,7 +37,7 @@ export default function NoteCard({
 
   return (
     <Card sx={{ maxWidth: 500 }}>
-      <CardActionArea href={`${notebook.uuid}`}>
+      <CardActionArea href={`/vault/${notebook.uuid}`}>
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
             {notebookTitle}
