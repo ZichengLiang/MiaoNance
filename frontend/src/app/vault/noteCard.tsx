@@ -26,7 +26,7 @@ export default function NoteCard({
   const [notebookTitle, setTitle] = React.useState(notebook.title);
 
   function handleEditTitle(notebook: NotebookMetadata) {
-    // TODO: instead of UUID, let user type its name
+    /* TODO: instead of UUID, let user type its name */
     setTitle(notebook.uuid);
     notebook.title = notebook.uuid;
   }
@@ -49,7 +49,11 @@ export default function NoteCard({
       </CardActionArea>
       <CardActions>
         <Tooltip title="Rename this notebook" placement="bottom">
-          <Button size="small" color="primary" onClick={() => handleEditTitle(notebook)}>
+          <Button
+            size="small"
+            color="primary"
+            onClick={() => handleEditTitle(notebook)}
+          >
             <Edit />
           </Button>
         </Tooltip>

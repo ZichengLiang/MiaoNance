@@ -1,8 +1,7 @@
 export interface NotebookMetadata {
-  // NotebookMetadata title
   title: string;
-  // NotebookMetadata creation time
   createdAt: Date;
-  // NotebookMetadata UUID
+  // We will use lastUpdated as the default sort comparator
+  lastUpdatedAt: Date; 
   uuid: string;
 }
