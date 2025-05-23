@@ -20,7 +20,6 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Logging in:', { email, password });
     // TODO: hit login API and handle error/redirect
   };
 

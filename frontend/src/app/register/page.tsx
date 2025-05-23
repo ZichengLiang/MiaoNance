@@ -45,7 +45,6 @@ export default function RegisterPage() {
     setError(newErrors);
 
     if (!hasError) {
-      console.log('Registering:', { email, password });
       // TODO: Call register API
     }
   };
