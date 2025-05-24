@@ -13,7 +13,7 @@ export default function NoteCardWrapper({
 }: NoteCardWrapperProps) {
   return (
     <div className="mx-32 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {notebooks.map((notebook: NotebookMetadata) => (
+      {notebooks && notebooks.map((notebook: NotebookMetadata) => (
         <NoteCard
           key={crypto.randomUUID()}
           notebook={notebook}

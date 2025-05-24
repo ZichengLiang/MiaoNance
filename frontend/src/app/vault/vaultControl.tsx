@@ -17,6 +17,7 @@ export default function VaultControl({
     const newNotebookMetadata = {
       title: "untitled",
       createdAt: new Date(timestamp),
+      updatedAt: new Date(timestamp),
       uuid: crypto.randomUUID(),
     };
     const newArr: NotebookMetadata[] = [...notebooks, newNotebookMetadata];
@@ -24,7 +25,7 @@ export default function VaultControl({
   }
   return (
     <div className="mx-32 pb-6 pt-3">
-      <Button variant="outlined" onClick={handleAddNotebook}>
+      <Button variant="outlined" sx={{color: 'primary'}} onClick={handleAddNotebook}>
         Add a new notebook
       </Button>
     </div>

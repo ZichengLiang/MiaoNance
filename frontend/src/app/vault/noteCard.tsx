@@ -23,24 +23,46 @@ export default function NoteCard({
   notebooks,
   setNotebooks,
 }: NoteCardProps) {
-  const [notebookTitle, setTitle] = React.useState(notebook.title);
 
-  function handleEditTitle(notebook: NotebookMetadata) {
+  function handleEditTitle(notebook: NotebookMetadata){
+
+    // A helper function when
+    function editTitle(target: NotebookMetadata): NotebookMetadata  {
+      // Leave non-target item alone...
+      if (notebook.uuid !== target.uuid) { return {...target};}
+
+      return {
+        ...target,
+        title: notebook.uuid
+      };
+    }
+
+    const newArr: NotebookMetadata[] = notebooks.map(editTitle);
+    setNotebooks(newArr);
     /* TODO: instead of UUID, let user type its name */
-    setTitle(notebook.uuid);
-    notebook.title = notebook.uuid;
   }
 
   function handleDelete(notebook: NotebookMetadata) {
     setNotebooks(notebooks.filter((item) => item.uuid !== notebook.uuid));
   }
 
+  /*
+    const handleDate = (date: string | Date) => {
+        if (typeof date === 'string') {
+          const realDate = new Date(date);
+          console.info(`handleDate: ${realDate}`);
+          return realDate;
+        }
+        return date;
+    }
+  */
+
   return (
     <Card sx={{ maxWidth: 500 }}>
       <CardActionArea href={`/vault/${notebook.uuid}`}>
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            {notebookTitle}
+            {notebook.title}
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
             {notebook.createdAt.toLocaleDateString()}
@@ -51,7 +73,7 @@ export default function NoteCard({
         <Tooltip title="Rename this notebook" placement="bottom">
           <Button
             size="small"
-            color="primary"
+            sx={{ color: "primary" }}
             onClick={() => handleEditTitle(notebook)}
           >
             <Edit />
@@ -60,7 +82,7 @@ export default function NoteCard({
         <Tooltip title="Delete this notebook" placement="bottom">
           <Button
             size="small"
-            color="primary"
+            sx={{ color: "#ff3d00" }}
             onClick={() => handleDelete(notebook)}
           >
             <Delete />
