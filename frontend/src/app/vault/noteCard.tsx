@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { NotebookMetadata } from "@/types/notebook_metadata";
+import VaultDialog from "./vaultDialog";
 
 interface NoteCardProps {
   notebook: NotebookMetadata;
@@ -23,72 +24,84 @@ export default function NoteCard({
   notebooks,
   setNotebooks,
 }: NoteCardProps) {
+  // states
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [dialogVariant, setDialogVariant] = React.useState('edit');
 
-  function handleEditTitle(notebook: NotebookMetadata){
+  // functions
+  function invokeDialog(variant: 'delete' | 'edit') {
+    setOpenDialog(true);
+    setDialogVariant(variant);
+  }
 
-    // A helper function when
-    function editTitle(target: NotebookMetadata): NotebookMetadata  {
+  function handleEdit(notebook: NotebookMetadata, title: string) {
+    // A helper function when we edit the title
+    function editTitle(target: NotebookMetadata): NotebookMetadata {
       // Leave non-target item alone...
-      if (notebook.uuid !== target.uuid) { return {...target};}
-
+      if (notebook.uuid !== target.uuid) {
+        return { ...target };
+      }
+      // Leave everything else the same, only change the title
       return {
         ...target,
-        title: notebook.uuid
+        title: title,
       };
     }
 
-    const newArr: NotebookMetadata[] = notebooks.map(editTitle);
-    setNotebooks(newArr);
-    /* TODO: instead of UUID, let user type its name */
+    const newNotebooks: NotebookMetadata[] = notebooks.map(editTitle);
+    setNotebooks(newNotebooks);
   }
 
-  function handleDelete(notebook: NotebookMetadata) {
-    setNotebooks(notebooks.filter((item) => item.uuid !== notebook.uuid));
-  }
-
-  /*
-    const handleDate = (date: string | Date) => {
-        if (typeof date === 'string') {
-          const realDate = new Date(date);
-          console.info(`handleDate: ${realDate}`);
-          return realDate;
-        }
-        return date;
+  function handleDelete(notebook: NotebookMetadata, title:string) {
+    const inputOK = title === notebook.title;
+    if (inputOK) {
+      setNotebooks(notebooks.filter((item) => item.uuid !== notebook.uuid));
     }
-  */
+    return inputOK;
+  }
 
   return (
-    <Card sx={{ maxWidth: 500 }}>
-      <CardActionArea href={`/vault/${notebook.uuid}`}>
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            {notebook.title}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            {notebook.createdAt.toLocaleDateString()}
-          </Typography>
-        </CardContent>
-      </CardActionArea>
-      <CardActions>
-        <Tooltip title="Rename this notebook" placement="bottom">
-          <Button
-            size="small"
-            sx={{ color: "primary" }}
-            onClick={() => handleEditTitle(notebook)}
-          >
-            <Edit />
-          </Button>
-        </Tooltip>
-        <Tooltip title="Delete this notebook" placement="bottom">
-          <Button
-            size="small"
-            sx={{ color: "#ff3d00" }}
-            onClick={() => handleDelete(notebook)}
-          >
-            <Delete />
-          </Button>
-        </Tooltip>
-      </CardActions>
-    </Card>
+    <>
+      <Card sx={{ maxWidth: 500 }}>
+        <CardActionArea href={`/vault/${notebook.uuid}`}>
+          <CardContent>
+            <Typography gutterBottom variant="h5" component="div">
+              {notebook.title}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              {notebook.createdAt.toLocaleDateString()}
+            </Typography>
+          </CardContent>
+        </CardActionArea>
+        <CardActions>
+          <Tooltip title="Rename this notebook" placement="bottom">
+            <Button
+              size="small"
+              sx={{ color: "primary" }}
+              onClick={() => invokeDialog('edit')}
+            >
+              <Edit />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Delete this notebook" placement="bottom">
+            <Button
+              size="small"
+              sx={{ color: "#ff3d00" }}
+              onClick={() => invokeDialog('delete')}
+            >
+              <Delete />
+            </Button>
+          </Tooltip>
+        </CardActions>
+      </Card>
+      <VaultDialog
+        isOpen={openDialog}
+        setIsOpen={setOpenDialog}
+        variant={dialogVariant}
+        notebook={notebook}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+      />
+    </>
   );
 }
