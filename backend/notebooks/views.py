@@ -4,10 +4,17 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.http import require_http_methods
 from .services.supabase_client import supabase
 from postgrest.exceptions import APIError
+
+@require_GET
+def health_check(request):
+    """
+    Simple site‐health endpoint.
+    """
+    return JsonResponse({"message": "Miao is alive"})
 
 # WARNING: Bypasses CSRF cookie requirement. For testing purposes only.
 @csrf_exempt
