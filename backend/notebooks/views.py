@@ -22,7 +22,11 @@ def health_check(request):
 def create_notebook(request):
     """
     Create a new Notebook row in Supabase.
-    Expects JSON body with: title (str), owner_id (int), trading_pairs (list/dict).
+    Expects JSON body with:
+      - title (str)
+      - owner_id (int)
+      - (optional) trading_pairs (list or dict)
+      - (optional) created_at and last_updated (ISO-8601 strings)
     URL: /api/notebooks/
     """
     try:
@@ -40,12 +44,30 @@ def create_notebook(request):
             status=400
         )
 
+    # Optional Timestamps
+    for ts_field in ("created_at", "updated_at"):
+        if ts_field in payload:
+            try:
+                dt = datetime.fromisoformat(payload[ts_field])
+                # normalize to full ISO format with offset
+                payload[ts_field] = dt.isoformat()
+            except ValueError:
+                return JsonResponse(
+                    {"error": f"Invalid ISO timestamp for {ts_field}"},
+                    status=400
+                )
+
     # Build the row data
     row = {
         "title": title,
         "owner_id": owner_id,
         "trading_pairs": trading_pairs,
     }
+
+    # merge in any supplied timestamps
+    for ts in ("created_at", "last_updated"):
+        if ts in payload:
+            row[ts] = payload[ts]
 
     # Insert into Supabase
     try:
