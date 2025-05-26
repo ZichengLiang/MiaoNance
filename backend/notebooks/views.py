@@ -1,5 +1,5 @@
 import json
-
+from datetime import datetime
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -82,6 +82,19 @@ def update_notebook(request, notebook_uuid):
             {"error": "No updatable fields provided."},
             status=400
         )
+
+    # Validate last_updated if present
+    if "last_updated" in payload:
+        try:
+            # Catch bad formats early
+            dt = datetime.fromisoformat(payload["last_updated"])
+            # Re-serialize to a full ISO string with offset (+00:00)
+            payload["last_updated"] = dt.isoformat()
+        except ValueError:
+            return JsonResponse(
+                {"error": "Invalid ISO timestamp for last_updated"},
+                status=400
+            )
 
     # Perform the update
     try:
