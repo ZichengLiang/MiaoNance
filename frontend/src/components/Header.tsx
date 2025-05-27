@@ -12,7 +12,7 @@ export default function Header() {
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
       >
         <div className="flex lg:flex-1">
-          <a href="#" className="-m-1.5 p-1.5">
+          <a href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">MiaoNance</span>
             <img
               alt="Our temporary logo -- a cute orange cat"
@@ -32,8 +32,8 @@ export default function Header() {
           </button>
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <a href="../login" className="text-sm/6 font-semibold text-white-900">
-            (To be implemented) Log in <span aria-hidden="true">&rarr;</span>
+          <a href="/login" className="text-sm/6 font-semibold text-white-900">
+            Log in <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
       </nav>
