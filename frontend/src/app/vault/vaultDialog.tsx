@@ -33,6 +33,71 @@ export default function VaultDialog({
     setDeleteValidated(true);
   };
 
+  function dialogTitle(variant: string) {
+    // return the right <DialogTitle> element based on the variant 'delete' | 'edit'
+    const dialogTitle_edit = <DialogTitle>Rename Notebook</DialogTitle>;
+    const dialogTitle_delete = (
+      <DialogTitle sx={{ color: "red" }}>
+        {" "}
+        <WarningAmber /> Delete Notebook
+      </DialogTitle>
+    );
+    let returnElement = (
+      <DialogTitle>
+        Error: not a valid variant (app/vault/vaultDialog.tsx)
+      </DialogTitle>
+    );
+
+    switch (variant) {
+      case "edit":
+        returnElement = dialogTitle_edit;
+        break;
+      case "delete":
+        returnElement = dialogTitle_delete;
+        break;
+      default:
+        break;
+    }
+    return returnElement;
+  }
+
+  function dialogContentText(variant: string) {
+    // return the right <DialogContentText> element based on the variant 'delete' | 'edit'
+    const dialogContentText_edit = (
+      <DialogContentText>
+        Please type in your preferred notebook title:
+      </DialogContentText>
+    );
+
+    const dialogContentText_delete = (
+      <DialogContentText>
+        Please type in the notebook title{" "}
+        <span className="font-bold">{notebook.title}</span> to confirm deletion:
+        <br />
+        {!deleteValidated &&
+          `⚠️The title doesn't match. Please check your spelling and capitalization.`}
+      </DialogContentText>
+    );
+
+    let returnElement = (
+      <DialogContentText>
+        Error: not a valid variant (app/vault/vaultDialog.tsx)
+      </DialogContentText>
+    );
+
+    switch (variant) {
+      case "edit":
+        returnElement = dialogContentText_edit;
+        break;
+      case "delete":
+        returnElement = dialogContentText_delete;
+        break;
+      default:
+        break;
+    }
+    return returnElement;
+  }
+
   return (
     <Dialog
       open={isOpen}
@@ -42,50 +107,39 @@ export default function VaultDialog({
           component: "form",
           onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
+            // Get the user input from the submission
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries((formData as any).entries());
             console.log(formJson);
-
             const userInput = formJson.title;
-            if (variant === "edit") {
-              handleEdit(notebook, userInput);
+            // Now the user input is ready, run the logic...
+            let shouldClose= true;
+            switch (variant) {
+              case "edit":
+                handleEdit(notebook, userInput);
+                break;
+              case "delete":
+                // Here handleDelete verify the user input with the notebook name
+                // shouldClose will be true if it's validated
+                shouldClose = handleDelete(notebook, userInput);
+                setDeleteValidated(shouldClose);
+                break;
+              default:
+                break;
             }
-            let deleted = true;
-            if (variant === "delete") {
-              deleted = handleDelete(notebook, userInput);
-              setDeleteValidated(deleted);
-            }
-            //console.log(email);
-            if (deleted) {
+            if (shouldClose) {
               handleClose();
             }
           },
         },
       }}
     >
-      {variant === "delete" && (
-        <DialogTitle sx={{ color: "red" }}>
-          {" "}
-          <WarningAmber /> Delete Notebook
-        </DialogTitle>
-      )}
-      {variant === "edit" && <DialogTitle>Rename Notebook</DialogTitle>}
+      {/* The Dialog Title*/}
+      {dialogTitle(variant)}
+
+      {/* The Dialog Content*/}
       <DialogContent>
-        {variant === "delete" && (
-          <DialogContentText>
-              Please type in the notebook title <span className="font-bold">{notebook.title}</span> to confirm
-              deletion:
-              <br/>
-            {!deleteValidated && 
-              `⚠️The title doesn't match. Please check your spelling and capitalization.`
-            }
-          </DialogContentText>
-        )}
-        {variant === "edit" && (
-          <DialogContentText>
-            Please type in your preferred notebook title:
-          </DialogContentText>
-        )}
+        {dialogContentText(variant)}
         <TextField
           autoFocus
           required

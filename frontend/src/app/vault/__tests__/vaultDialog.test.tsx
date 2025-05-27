@@ -4,6 +4,17 @@ import VaultDialog from "../vaultDialog";
 import React from "react";
 import { NotebookMetadata } from "@/types/notebook_metadata";
 
+/* 
+  Currently there are 6 tests for vaultDialog component in this file: 
+  1. It renders edit dialog correctly
+  2. It renders delete dialog correctly
+  3. It handles edit submission correctly
+  4. It handles delete submission correctly
+  5. It shows error message when delete title does not match
+  6. It closes dialog when cancel button is clicked
+  use `npm run test` to run the test
+*/
+
 // Mock notebook data
 const mockNotebook: NotebookMetadata = {
   uuid: "1",
