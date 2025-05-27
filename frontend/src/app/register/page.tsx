@@ -167,4 +167,5 @@ export default function RegisterPage() {
       <Footer />
     </div>
   );
+
 }
