@@ -1,6 +1,6 @@
-import React, { JSXElementConstructor } from "react";
+import React from "react";
 import TextField from "@mui/material/TextField";
-import { Button, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -93,6 +93,7 @@ export default function VaultDialog({
           id="name"
           name="title"
           label={variant === "edit" ? "New Notebook Title" : "Notebook Title"}
+          inputProps={{ "data-testid": "content-input" }}
           fullWidth
           variant="standard"
         />

@@ -5,7 +5,7 @@ import React from "react";
 import { NotebookMetadata } from "@/types/notebook_metadata";
 
 // Mock notebook data
-const mockNotebook = {
+const mockNotebook: NotebookMetadata = {
   uuid: "1",
   title: "Test Notebook",
   createdAt: new Date(),
@@ -39,7 +39,7 @@ describe("VaultDialog", () => {
     expect(screen.getByText("Rename Notebook")).toBeInTheDocument();
 
     // Check if input field is present
-    expect(screen.getByLabelText("New Notebook Title")).toBeInTheDocument();
+    expect(screen.getByText("New Notebook Title")).toBeInTheDocument();
 
     // Check if buttons are present
     expect(screen.getByText("Cancel")).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("VaultDialog", () => {
     expect(screen.getByText(mockNotebook.title)).toBeInTheDocument();
 
     // Check if input field is present
-    expect(screen.getByLabelText("New Notebook Title")).toBeInTheDocument();
+    expect(screen.getByText("Notebook Title")).toBeInTheDocument();
   });
 
   it("handles edit submission correctly", () => {
@@ -84,11 +84,11 @@ describe("VaultDialog", () => {
     );
 
     // Fill in the new title
-    const input = screen.getByLabelText("New Notebook Title");
+    const input = screen.getByTestId("content-input");
     fireEvent.change(input, { target: { value: "New Title" } });
 
     // Submit the form
-    const form = screen.getByRole("form");
+    const form = screen.getByRole("dialog");
     fireEvent.submit(form);
 
     // Check if handleEdit was called with correct parameters
@@ -111,11 +111,11 @@ describe("VaultDialog", () => {
     );
 
     // Fill in the matching title
-    const input = screen.getByLabelText("Notebook Title");
+    const input = screen.getByTestId("content-input");
     fireEvent.change(input, { target: { value: mockNotebook.title } });
 
     // Submit the form
-    const form = screen.getByRole("form");
+    const form = screen.getByRole("dialog");
     fireEvent.submit(form);
 
     // Check if handleDelete was called with correct parameters
@@ -141,11 +141,11 @@ describe("VaultDialog", () => {
     );
 
     // Fill in the wrong title
-    const input = screen.getByLabelText("Notebook Title");
+    const input = screen.getByTestId("content-input");
     fireEvent.change(input, { target: { value: "Wrong Title" } });
 
     // Submit the form
-    const form = screen.getByRole("form");
+    const form = screen.getByRole("dialog");
     fireEvent.submit(form);
 
     // Check if error message is shown
