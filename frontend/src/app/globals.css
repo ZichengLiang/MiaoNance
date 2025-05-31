@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* This is for the TextBox from TipTap. 
+   It's important to have this to prevent style issues from source library.*/
+.ProseMirror {
+  color: inherit;
+  outline: none;
+  /* border: none; */
+  font-family: inherit;
+}
+

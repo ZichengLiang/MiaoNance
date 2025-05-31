@@ -1,5 +1,103 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  List,
+  ListOrdered,
+  Undo,
+  Redo,
+} from "lucide-react";
 
 export default function NoteArea() {
-    return (<div className="w-full text-center"> I am the note area :D</div>)
+  const [cleared, setCleared] = useState(false);
+
+  const editor = useEditor({
+    extensions: [StarterKit, Underline],
+    content: "<p>Start writing your notes here...</p>",
+    autofocus: "end",
+    onUpdate: ({ editor }) => {
+      if (!cleared) {
+        const text = editor.getText();
+        if (text.includes("Start writing your notes here")) {
+          editor.commands.clearContent();
+        }
+        setCleared(true);
+      }
+    },
+  });
+
+  const buttonClass =
+    "p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition disabled:opacity-50";
+
+  const ToolbarButton = ({
+    action,
+    icon,
+    disabled,
+  }: {
+    action: () => void;
+    icon: React.ReactNode;
+    disabled?: boolean;
+  }) => (
+    <button onClick={action} className={buttonClass} disabled={disabled}>
+      {icon}
+    </button>
+  );
+
+  return (
+    <div className="w-full h-screen flex justify-center">
+      <div className="w-full max-w-2xl h-[80vh] p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md flex flex-col">
+        <h2 className="text-xl font-bold text-center text-black dark:text-white mb-4">
+          Note Area
+        </h2>
+
+        {editor && (
+          <div className="flex gap-2 flex-wrap mb-2 pb-2">
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleBold().run()}
+              icon={<Bold size={16} />}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleItalic().run()}
+              icon={<Italic size={16} />}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleUnderline().run()}
+              icon={<UnderlineIcon size={16} />}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleBulletList().run()}
+              icon={<List size={16} />}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleOrderedList().run()}
+              icon={<ListOrdered size={16} />}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().undo().run()}
+              icon={<Undo size={16} />}
+              disabled={!editor.can().undo()}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().redo().run()}
+              icon={<Redo size={16} />}
+              disabled={!editor.can().redo()}
+            />
+          </div>
+        )}
+
+        <div
+          className="border rounded p-3 flex-1 overflow-auto bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-0 ProseMirror"
+          onClick={() => editor?.commands.focus()}
+        >
+          <EditorContent editor={editor} />
+        </div>
+      </div>
+    </div>
+  );
 }
