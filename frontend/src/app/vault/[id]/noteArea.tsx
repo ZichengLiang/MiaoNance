@@ -33,7 +33,7 @@ export default function NoteArea() {
   });
 
   const buttonClass =
-    "p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition disabled:opacity-50";
+    "p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition disabled:opacity-50 focus:outline-none";
 
   const ToolbarButton = ({
     action,
@@ -50,14 +50,11 @@ export default function NoteArea() {
   );
 
   return (
-    <div className="w-full h-screen flex justify-center">
-      <div className="w-full max-w-2xl h-[80vh] p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md flex flex-col">
-        <h2 className="text-xl font-bold text-center text-black dark:text-white mb-4">
-          Note Area
-        </h2>
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-2xl h-[80vh] p-4 bg-[#f5f5f5] dark:bg-[#111111] rounded-lg shadow-sm flex flex-col">
 
         {editor && (
-          <div className="flex gap-2 flex-wrap mb-2 pb-2">
+          <div className="flex gap-2 flex-wrap mb-2 border-b border-gray-300 dark:border-[#222] pb-2">
             <ToolbarButton
               action={() => editor.chain().focus().toggleBold().run()}
               icon={<Bold size={16} />}
@@ -92,7 +89,7 @@ export default function NoteArea() {
         )}
 
         <div
-          className="border rounded p-3 flex-1 overflow-auto bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-0 ProseMirror"
+          className="rounded p-3 flex-1 overflow-auto bg-[#f1f1f1] text-black dark:bg-[#1a1a1a] dark:text-gray-100 dark:border dark:border-[#2a2a2a] focus:outline-none"
           onClick={() => editor?.commands.focus()}
         >
           <EditorContent editor={editor} />
