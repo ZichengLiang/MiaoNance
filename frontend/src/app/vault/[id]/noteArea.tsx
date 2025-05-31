@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
+import Highlight from "@tiptap/extension-highlight";
+import Image from "@tiptap/extension-image";
 import {
   Bold,
   Italic,
@@ -18,6 +20,8 @@ import {
   Redo,
   Maximize2,
   Minimize2,
+  Highlighter,
+  ImagePlus,
 } from "lucide-react";
 
 export default function NoteArea() {
@@ -25,14 +29,23 @@ export default function NoteArea() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+      }),
       Underline,
+      Highlight.configure({ multicolor: false }),
       Placeholder.configure({
         placeholder: "Start writing your notes here...",
       }),
       BulletList,
       OrderedList,
       ListItem,
+      Image.configure({
+        allowBase64: true,
+        inline: false,
+      }),
     ],
     content: "",
     autofocus: "end",
@@ -45,7 +58,37 @@ export default function NoteArea() {
     }
   }, [editor]);
 
-  // Escape key exits fullscreen
+  // Paste image handler
+  useEffect(() => {
+    if (!editor) return;
+
+    const handlePaste = (event: ClipboardEvent) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.indexOf("image") === 0) {
+          const file = item.getAsFile();
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64 = reader.result;
+              if (typeof base64 === "string") {
+                editor.chain().focus().setImage({ src: base64 }).run();
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    };
+
+    const dom = editor.view.dom;
+    dom.addEventListener("paste", handlePaste);
+    return () => dom.removeEventListener("paste", handlePaste);
+  }, [editor]);
+
+  // Escape exits fullscreen
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && fullscreen) {
@@ -72,12 +115,12 @@ export default function NoteArea() {
   }) => (
     <button
       onMouseDown={(e) => {
-        e.preventDefault(); // Prevent editor blur
+        e.preventDefault();
         action();
       }}
       className={`${buttonClass} ${
         isActive
-          ? "bg-gray-300 dark:bg-gray-700"
+          ? "bg-yellow-200 dark:bg-yellow-400/20"
           : "hover:bg-gray-100 dark:hover:bg-gray-700"
       }`}
       disabled={disabled}
@@ -99,7 +142,7 @@ export default function NoteArea() {
       >
         {/* Toolbar */}
         {editor && (
-          <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 px-4 pt-4 pb-2">
+          <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 px-4 pt-4 pb-2 flex-wrap">
             <ToolbarButton
               action={() => editor.chain().focus().toggleBold().run()}
               icon={<Bold size={16} />}
@@ -114,6 +157,11 @@ export default function NoteArea() {
               action={() => editor.chain().focus().toggleUnderline().run()}
               icon={<UnderlineIcon size={16} />}
               isActive={editor.isActive("underline")}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleHighlight().run()}
+              icon={<Highlighter size={16} />}
+              isActive={editor.isActive("highlight")}
             />
             <ToolbarButton
               action={() => editor.chain().focus().toggleBulletList().run()}
@@ -144,7 +192,52 @@ export default function NoteArea() {
           </div>
         )}
 
-        {/* Editor area */}
+        {/* Bubble Menu */}
+        {editor && (
+          <BubbleMenu
+            editor={editor}
+            tippyOptions={{ duration: 100 }}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow rounded flex gap-1 p-1 z-50"
+          >
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                editor.chain().focus().toggleBold().run();
+              }}
+              className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                editor.isActive("bold") ? "bg-gray-200 dark:bg-gray-600" : ""
+              }`}
+            >
+              <Bold size={16} />
+            </button>
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                editor.chain().focus().toggleItalic().run();
+              }}
+              className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                editor.isActive("italic") ? "bg-gray-200 dark:bg-gray-600" : ""
+              }`}
+            >
+              <Italic size={16} />
+            </button>
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                editor.chain().focus().toggleHighlight().run();
+              }}
+              className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                editor.isActive("highlight")
+                  ? "bg-yellow-200 dark:bg-yellow-500/20"
+                  : ""
+              }`}
+            >
+              <Highlighter size={16} />
+            </button>
+          </BubbleMenu>
+        )}
+
+        {/* Editor */}
         <div
           className="px-4 pb-4 h-[500px] overflow-y-auto overflow-x-hidden focus:outline-none text-base leading-relaxed dark:text-white"
           onClick={() => editor?.commands.focus()}

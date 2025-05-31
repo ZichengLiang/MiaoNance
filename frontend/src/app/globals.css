@@ -32,6 +32,7 @@ body {
   outline: none;
   /* border: none; */
   font-family: inherit;
+  position: relative;
 }
 
 .ProseMirror ul {
@@ -44,4 +45,11 @@ body {
   padding-left: 1.5rem;
 }
 
+.ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af; /* Tailwind gray-400 */
+  pointer-events: none;
+  height: 0;
+}
 
