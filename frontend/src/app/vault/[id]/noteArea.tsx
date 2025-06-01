@@ -21,7 +21,6 @@ import {
   Maximize2,
   Minimize2,
   Highlighter,
-  ImagePlus,
 } from "lucide-react";
 
 export default function NoteArea() {
@@ -42,23 +41,15 @@ export default function NoteArea() {
       BulletList,
       OrderedList,
       ListItem,
-      Image.configure({
-        allowBase64: true,
-        inline: false,
-      }),
+      Image.configure({ allowBase64: true }),
     ],
-    content: "",
+    content: {
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: "" }] }],
+    },
     autofocus: "end",
   });
 
-  // Focus editor on mount
-  useEffect(() => {
-    if (editor) {
-      editor.commands.focus("end");
-    }
-  }, [editor]);
-
-  // Paste image handler
   useEffect(() => {
     if (!editor) return;
 
@@ -88,7 +79,6 @@ export default function NoteArea() {
     return () => dom.removeEventListener("paste", handlePaste);
   }, [editor]);
 
-  // Escape exits fullscreen
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && fullscreen) {
@@ -131,15 +121,13 @@ export default function NoteArea() {
 
   return (
     <div
-      className={`w-full h-full ${
-        fullscreen ? "fixed inset-0 z-50 bg-black px-4 py-8" : ""
+      className={`w-full ${
+        fullscreen
+          ? "fixed inset-0 z-50 bg-black px-4 py-8 h-screen"
+          : "min-h-[500px]"
       }`}
     >
-      <div
-        className={`w-full ${
-          fullscreen ? "h-full max-w-none" : "h-full"
-        } bg-white dark:bg-[#121212] rounded-lg shadow-sm flex flex-col gap-4`}
-      >
+      <div className="w-full h-full bg-white dark:bg-[#121212] rounded-lg shadow-sm flex flex-col gap-4 overflow-hidden">
         {/* Toolbar */}
         {editor && (
           <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 px-4 pt-4 pb-2 flex-wrap">
@@ -199,47 +187,31 @@ export default function NoteArea() {
             tippyOptions={{ duration: 100 }}
             className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow rounded flex gap-1 p-1 z-50"
           >
-            <button
-              onMouseDown={(e) => {
-                e.preventDefault();
-                editor.chain().focus().toggleBold().run();
-              }}
-              className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                editor.isActive("bold") ? "bg-gray-200 dark:bg-gray-600" : ""
-              }`}
-            >
-              <Bold size={16} />
-            </button>
-            <button
-              onMouseDown={(e) => {
-                e.preventDefault();
-                editor.chain().focus().toggleItalic().run();
-              }}
-              className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                editor.isActive("italic") ? "bg-gray-200 dark:bg-gray-600" : ""
-              }`}
-            >
-              <Italic size={16} />
-            </button>
-            <button
-              onMouseDown={(e) => {
-                e.preventDefault();
-                editor.chain().focus().toggleHighlight().run();
-              }}
-              className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                editor.isActive("highlight")
-                  ? "bg-yellow-200 dark:bg-yellow-500/20"
-                  : ""
-              }`}
-            >
-              <Highlighter size={16} />
-            </button>
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleBold().run()}
+              icon={<Bold size={16} />}
+              isActive={editor.isActive("bold")}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleItalic().run()}
+              icon={<Italic size={16} />}
+              isActive={editor.isActive("italic")}
+            />
+            <ToolbarButton
+              action={() => editor.chain().focus().toggleHighlight().run()}
+              icon={<Highlighter size={16} />}
+              isActive={editor.isActive("highlight")}
+            />
           </BubbleMenu>
         )}
 
-        {/* Editor */}
+        {/* Editor Content */}
         <div
-          className="px-4 pb-4 h-[500px] overflow-y-auto overflow-x-hidden focus:outline-none text-base leading-relaxed dark:text-white"
+          className={`px-4 pb-4 overflow-x-hidden focus:outline-none text-base leading-relaxed dark:text-white ${
+            fullscreen
+              ? "flex-1 overflow-y-auto h-full"
+              : "h-[500px] overflow-y-auto"
+          }`}
           onClick={() => editor?.commands.focus()}
         >
           <EditorContent editor={editor} />
