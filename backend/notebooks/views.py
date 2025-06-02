@@ -1,7 +1,7 @@
 import json
 import requests
 from datetime import datetime
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -31,7 +31,7 @@ def create_notebook(request):
     {
       "title": "My Notebook",
       "owner_id": "<uuid>",
-      "trading_pairs": ["BTC/USDT", "ETH/EUR"],
+      "trading_pairs": ["BTC/USDT", "ETH/BTC"],
       "created_at": "...",       # optional
       "last_updated": "..."      # optional
     }
@@ -143,60 +143,118 @@ def create_notebook(request):
 @require_http_methods(["PUT", "PATCH"])
 def update_notebook(request, notebook_uuid):
     """
-    Fully update a Notebook row. Any of the writable columns in the payload
-    (e.g. title, owner_id, trading_pairs) will be applied.
-    URL: /api/notebooks/<uuid>/
+    1) Update writable columns on Notebook (title, last_updated, etc.).
+    2) If "trading_pairs" (strings) is present:
+       a) Look up each string in TradingPairs.trading_pair to get its id.
+       b) Delete existing rows in Notebook_TradingPairs for this notebook.
+       c) Bulk‐insert new ones.
+    URL: PATCH /api/notebooks/<uuid>/
     """
-    # Validate UUID
-    try:
-        notebook_uuid = str(notebook_uuid)
-    except ValueError:
-        return JsonResponse({"error": "Invalid notebook UUID"}, status=400)
+    nb_id = str(notebook_uuid)
 
-    # Parse JSON
+    # 1) Parse JSON
     try:
         payload = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    # Remove non-writable fields if present
-    for forbidden in ("uuid", "created_at"):
+    # 2) Remove system fields
+    for forbidden in ("uuid", "owner_id", "created_at"):
         payload.pop(forbidden, None)
 
     if not payload:
-        return JsonResponse(
-            {"error": "No updatable fields provided."},
-            status=400
-        )
+        return JsonResponse({"error": "No updatable fields provided."}, status=400)
 
-    # Validate last_updated if present
+    # 3) Extract trading_pairs if provided
+    new_pair_strings = None
+    if "trading_pairs" in payload:
+        new_pair_strings = payload.pop("trading_pairs")
+
+    # 4) Validate last_updated if present
     if "last_updated" in payload:
         try:
-            # Catch bad formats early
             dt = datetime.fromisoformat(payload["last_updated"])
-            # Re-serialize to a full ISO string with offset (+00:00)
             payload["last_updated"] = dt.isoformat()
         except ValueError:
-            return JsonResponse(
-                {"error": "Invalid ISO timestamp for last_updated"},
-                status=400
-            )
+            return JsonResponse({"error": "Invalid ISO timestamp for last_updated"}, status=400)
 
-    # Perform the update
+    # 5) Update the base Notebook row
     try:
-        res = (
+        upd_res = (
             supabase
             .table("Notebook")
             .update(payload)
-            .eq("uuid", notebook_uuid)
+            .eq("uuid", nb_id)
             .execute()
         )
     except APIError as e:
-        # catches HTTP errors from Supabase
         return JsonResponse({"error": e.message}, status=400)
 
-    updated = res.data[0]
-    return JsonResponse({"notebook": updated}, status=200)
+    if not upd_res.data:
+        raise Http404("Notebook not found")
+
+    updated_notebook = upd_res.data[0]
+
+    # 6) If trading_pairs was provided, replace join‐table links
+    linked = []
+    if isinstance(new_pair_strings, list):
+        # a) Clean & dedupe strings
+        cleaned = []
+        for s in new_pair_strings:
+            if not isinstance(s, str) or not s.strip():
+                return JsonResponse({"error": f"Invalid trading pair string: {s!r}"}, status=400)
+            cleaned.append(s.strip().upper())
+        cleaned_set = list(dict.fromkeys(cleaned))
+
+        # b) Look up their IDs via "trading_pair" column
+        try:
+            lookup = (
+                supabase
+                .table("TradingPairs")
+                .select("id,trading_pair")
+                .in_("trading_pair", cleaned_set)
+                .execute()
+            )
+        except APIError as e:
+            return JsonResponse({"error": f"Supabase lookup error: {e.message}"}, status=500)
+
+        existing_rows = lookup.data or []
+        string_to_id = {row["trading_pair"].upper(): row["id"] for row in existing_rows}
+
+        missing = [s for s in cleaned_set if s not in string_to_id]
+        if missing:
+            return JsonResponse({"error": f"These trading pairs do not exist: {missing}"}, status=400)
+
+        # c) Delete existing links for this notebook
+        try:
+            supabase \
+                .table("Notebook_TradingPairs") \
+                .delete() \
+                .eq("notebook_id", nb_id) \
+                .execute()
+        except APIError as e:
+            return JsonResponse({"error": e.message}, status=400)
+
+        # d) Bulk‐insert new links
+        payloads = [
+            {"notebook_id": nb_id, "trading_pair_id": string_to_id[s]}
+            for s in cleaned_set
+        ]
+        try:
+            link_res = (
+                supabase
+                .table("Notebook_TradingPairs")
+                .insert(payloads)
+                .execute()
+            )
+        except APIError as e:
+            return JsonResponse({"error": e.message}, status=400)
+        linked = link_res.data or []
+
+    return JsonResponse({
+        "notebook":     updated_notebook,
+        "linked_pairs": linked
+    }, status=200)
 
 
 # WARNING: Bypasses CSRF cookie requirement. For testing purposes only.
