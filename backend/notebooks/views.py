@@ -1,4 +1,5 @@
 import json
+import requests
 from datetime import datetime
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -21,13 +22,19 @@ def health_check(request):
 @require_POST
 def create_notebook(request):
     """
-    Create a new Notebook row in Supabase.
-    Expects JSON body with:
-      - title (str)
-      - owner_id (int)
-      - (optional) trading_pairs (list or dict)
-      - (optional) created_at and last_updated (ISO-8601 strings)
-    URL: /api/notebooks/
+    1) Insert a new row into Notebook.
+    2) If the client sent "trading_pairs": ["BTC/USDT", "ETH/EUR", ...],
+       look up each string in TradingPairs to get its ID, then bulk-insert
+       into Notebook_TradingPairs.
+    URL: POST /api/notebooks/
+    Body JSON:
+    {
+      "title": "My Notebook",
+      "owner_id": "<uuid>",
+      "trading_pairs": ["BTC/USDT", "ETH/EUR"],
+      "created_at": "...",       # optional
+      "last_updated": "..."      # optional
+    }
     """
     try:
         payload = json.loads(request.body)
@@ -36,20 +43,19 @@ def create_notebook(request):
 
     title = payload.get("title")
     owner_id = payload.get("owner_id")
-    trading_pairs = payload.get("trading_pairs", [])
+    pair_strings = payload.get("trading_pairs", [])  # now strings, not IDs
 
     if not title or owner_id is None:
-        return JsonResponse (
+        return JsonResponse(
             {"error": "Missing required fields: title and owner_id"},
             status=400
         )
 
-    # Optional Timestamps
-    for ts_field in ("created_at", "updated_at"):
+    # 1a) Optional timestamps on Notebooks
+    for ts_field in ("created_at", "last_updated"):
         if ts_field in payload:
             try:
                 dt = datetime.fromisoformat(payload[ts_field])
-                # normalize to full ISO format with offset
                 payload[ts_field] = dt.isoformat()
             except ValueError:
                 return JsonResponse(
@@ -57,28 +63,79 @@ def create_notebook(request):
                     status=400
                 )
 
-    # Build the row data
-    row = {
+    # 1b) Insert into Notebooks table
+    notebook_row = {
         "title": title,
         "owner_id": owner_id,
-        "trading_pairs": trading_pairs,
     }
-
-    # merge in any supplied timestamps
     for ts in ("created_at", "last_updated"):
         if ts in payload:
-            row[ts] = payload[ts]
+            notebook_row[ts] = payload[ts]
 
-    # Insert into Supabase
     try:
-        res = supabase.table("Notebooks").insert(row).execute()
+        nb_res = supabase.table("Notebook").insert(notebook_row).execute()
     except APIError as e:
-        # e.message contains the PostgREST error details
         return JsonResponse({"error": e.message}, status=400)
 
-    # res.data is a list of inserted rows; take the first
-    created = res.data[0]
-    return JsonResponse({"notebook": created}, status=201)
+    new_notebook = nb_res.data[0]
+    notebook_uuid = new_notebook["uuid"]
+
+    # 2) If trading_pairs were provided, look up their IDs and link them
+    linked = []
+    if isinstance(pair_strings, list) and pair_strings:
+        # a) Normalize / dedupe the incoming strings
+        cleaned = []
+        for s in pair_strings:
+            if not isinstance(s, str) or not s.strip():
+                return JsonResponse(
+                    {"error": f"Invalid trading pair string: {s!r}"},
+                    status=400
+                )
+            cleaned.append(s.strip().upper())
+        cleaned_set = list(dict.fromkeys(cleaned))  # preserve order but dedupe
+
+        # b) Fetch all matching IDs from TradingPairs
+        try:
+            lookup = supabase \
+                .table("TradingPairs") \
+                .select("id,trading_pair") \
+                .in_("trading_pair", cleaned_set) \
+                .execute()
+        except APIError as e:
+            return JsonResponse({"error": f"Supabase lookup error: {e.message}"}, status=500)
+
+        existing_rows = lookup.data or []
+        # Build a map: { "BTC/USDT": 17, "ETH/EUR": 23, ... }
+        string_to_id = {row["trading_pair"].upper(): row["id"] for row in existing_rows}
+
+        # c) Check for any missing
+        missing = [s for s in cleaned_set if s not in string_to_id]
+        if missing:
+            return JsonResponse(
+                {"error": f"These trading pairs do not exist: {missing}"},
+                status=400
+            )
+
+        # d) Bulk-insert into Notebook_TradingPairs
+        payloads = [
+            {"notebook_id": notebook_uuid, "trading_pair_id": string_to_id[s]}
+            for s in cleaned_set
+        ]
+        try:
+            link_res = (
+                supabase
+                .table("Notebook_TradingPairs")
+                .insert(payloads)
+                .execute()
+            )
+        except APIError as e:
+            return JsonResponse({"error": e.message}, status=400)
+        linked = link_res.data or []
+
+    return JsonResponse({
+        "notebook":     new_notebook,
+        "linked_pairs": linked
+    }, status=201)
 
 
 # WARNING: Bypasses CSRF cookie requirement. For testing purposes only.
@@ -129,7 +186,7 @@ def update_notebook(request, notebook_uuid):
     try:
         res = (
             supabase
-            .table("Notebooks")
+            .table("Notebook")
             .update(payload)
             .eq("uuid", notebook_uuid)
             .execute()
@@ -140,3 +197,113 @@ def update_notebook(request, notebook_uuid):
 
     updated = res.data[0]
     return JsonResponse({"notebook": updated}, status=200)
+
+
+# WARNING: Bypasses CSRF cookie requirement. For testing purposes only.
+@csrf_exempt
+@require_POST
+def sync_trading_pairs(request):
+    """
+    1) Fetch /api/v3/exchangeInfo from Binance.
+    2) Build a set of "BASE/QUOTE" strings for all symbols with status == "TRADING".
+    3) Fetch existing trading_pair values from Supabase table TradingPairs.
+    4) Insert only the new pairs.
+    Returns JSON: { "inserted": [...], "skipped": [...] }
+    """
+    # 1) Call Binance API
+    try:
+        resp = requests.get(
+            "https://api.binance.com/api/v3/exchangeInfo",
+            timeout=10
+        )
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        return JsonResponse(
+            {"error": f"Binance API error: {str(e)}"},
+            status=502
+        )
+
+    data = resp.json()
+    symbols = data.get("symbols", [])
+    if not isinstance(symbols, list):
+        return JsonResponse(
+            {"error": "Unexpected Binance response format."},
+            status=502
+        )
+
+    # 2) Normalize to "BASE/QUOTE"
+    incoming_set = set()
+    for s in symbols:
+        # Only consider symbols that are actively trading
+        if s.get("status") != "TRADING":
+            continue
+
+        base = s.get("baseAsset")
+        quote = s.get("quoteAsset")
+        # sanity check
+        if not (isinstance(base, str) and isinstance(quote, str)):
+            continue
+
+        pair = f"{base}/{quote}"
+        incoming_set.add(pair)
+
+    if not incoming_set:
+        return JsonResponse(
+            {"error": "No trading pairs found from Binance."},
+            status=502
+        )
+
+    # 3) Page through all existing TradingPairs rows (by default Supabase limit is 1000 per page)
+    existing_set = set()
+    page_size = 1000
+    offset = 0
+
+    while True:
+        try:
+            fetch_res = (
+                supabase
+                .table("TradingPairs")
+                .select("trading_pair")
+                .range(offset, offset + page_size - 1)
+                .execute()
+            )
+        except APIError as e:
+            return JsonResponse(
+                {"error": f"Supabase fetch error: {e.message}"},
+                status=500
+            )
+
+        batch = fetch_res.data or []
+        if not batch:
+            break
+
+        for row in batch:
+            if "trading_pair" in row and isinstance(row["trading_pair"], str):
+                existing_set.add(row["trading_pair"])
+        offset += page_size
+
+    # 4) Determine which pairs to insert
+    to_insert = list(incoming_set - existing_set)
+    skipped = list(incoming_set & existing_set)
+    inserted_rows = []
+
+    if to_insert:
+        payloads = [{"trading_pair": p} for p in to_insert]
+        try:
+            insert_res = (
+                supabase
+                .table("TradingPairs")
+                .insert(payloads)
+                .execute()
+            )
+        except APIError as e:
+            return JsonResponse(
+                {"error": f"Supabase insert error: {e.message}"},
+                status=500
+            )
+        inserted_rows = insert_res.data or []
+
+    return JsonResponse(
+        {"inserted": inserted_rows, "skipped": skipped},
+        status=201
+    )
