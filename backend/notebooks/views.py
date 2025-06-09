@@ -1,4 +1,5 @@
 import json
+import uuid
 import requests
 from datetime import datetime
 from django.http import JsonResponse, Http404
@@ -365,3 +366,44 @@ def sync_trading_pairs(request):
         {"inserted": inserted_rows, "skipped": skipped},
         status=201
     )
+
+@csrf_exempt
+@require_POST
+def upload_image(request):
+    """
+    Upload to private 'Images' bucket and return a signed URL valid for 1 hour.
+    """
+    upload_file = request.FILES.get("file")
+    if not upload_file:
+        return JsonResponse({"error": "No file provided"}, status=400)
+
+    # 1) Make a unique filename (preserve extension)
+    orig = upload_file.name
+    ext = orig.rsplit(".", 1)[-1].lower() if "." in orig else ""
+    filename = f"{uuid.uuid4()}{'.' + ext if ext else ''}"
+
+    # 2) Upload: first arg is 'path', second is file bytes
+    try:
+        supabase.storage.from_("images").upload(
+            filename,
+            upload_file.read()
+        )
+    except APIError as e:
+        return JsonResponse({"error": e.message}, status=500)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+    # 3) Generate a signed URL (expires in 3600 seconds)
+    try:
+        signed = supabase.storage.from_("images").create_signed_url(
+            filename, 3600
+        )
+    except APIError as e:
+        return JsonResponse({"error": e.message}, status=500)
+
+    # The storage3 client returns {'signedURL': '…', 'error': None}
+    url = signed.get("signedURL")
+    if not url:
+        return JsonResponse({"error": "Failed to generate signed URL"}, status=500)
+
+    return JsonResponse({"url": url}, status=201)
