@@ -1,14 +1,6 @@
 import React from "react";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardActionArea,
-  Typography,
-  CardActions,
-  Tooltip,
-} from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { NotebookMetadata } from "@/types/notebook_metadata";
 import VaultDialog from "./vaultDialog";
 
@@ -62,38 +54,34 @@ export default function NoteCard({
 
   return (
     <>
-      <Card sx={{ maxWidth: 500 }}>
-        <CardActionArea href={`/vault/${notebook.uuid}`}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 max-w-md group">
+        <Link href={`/vault/${notebook.uuid}`} className="block">
+          <div className="p-4 hover:bg-gray-50 transition-colors duration-200">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
               {notebook.title}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            </h3>
+            <p className="text-sm text-gray-500">
               {notebook.createdAt.toLocaleDateString()}
-            </Typography>
-          </CardContent>
-        </CardActionArea>
-        <CardActions>
-          <Tooltip title="Rename this notebook" placement="bottom">
-            <Button
-              size="small"
-              sx={{ color: "primary" }}
-              onClick={() => invokeDialog('edit')}
-            >
-              <Edit />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Delete this notebook" placement="bottom">
-            <Button
-              size="small"
-              sx={{ color: "#ff3d00" }}
-              onClick={() => invokeDialog('delete')}
-            >
-              <Delete />
-            </Button>
-          </Tooltip>
-        </CardActions>
-      </Card>
+            </p>
+          </div>
+        </Link>
+        <div className="flex justify-end gap-2 p-4 pt-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            className="flex items-center justify-center w-8 h-8 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
+            onClick={() => invokeDialog('edit')}
+            title="Rename this notebook"
+          >
+            <PencilIcon className="w-4 h-4" />
+          </button>
+          <button
+            className="flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors"
+            onClick={() => invokeDialog('delete')}
+            title="Delete this notebook"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
       <VaultDialog
         isOpen={openDialog}
         setIsOpen={setOpenDialog}

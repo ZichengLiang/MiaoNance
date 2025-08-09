@@ -1,5 +1,5 @@
-import { Button } from "@mui/material";
 import React from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { NotebookMetadata } from "@/types/notebook_metadata";
 
 interface VaultControlProps {
@@ -25,9 +25,13 @@ export default function VaultControl({
   }
   return (
     <div className="mx-32 pb-6 pt-3">
-      <Button variant="outlined" sx={{color: 'primary'}} onClick={handleAddNotebook}>
+      <button 
+        onClick={handleAddNotebook}
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-blue-300 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+      >
+        <PlusIcon className="w-4 h-4" />
         Add a new notebook
-      </Button>
+      </button>
     </div>
   );
 }
