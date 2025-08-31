@@ -33,15 +33,15 @@ export default function NoteCard({
       if (notebook.uuid !== target.uuid) {
         return { ...target };
       }
-      // Leave everything else the same, only change the title
+      // only change the target's title
       return {
         ...target,
         title: title,
       };
     }
 
-    const newNotebooks: NotebookMetadata[] = notebooks.map(editTitle);
-    setNotebooks(newNotebooks);
+    const editedNotebooks: NotebookMetadata[] = notebooks.map(editTitle);
+    setNotebooks(editedNotebooks);
   }
 
   function handleDelete(notebook: NotebookMetadata, title:string) {

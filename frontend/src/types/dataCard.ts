@@ -1,7 +1,6 @@
 export interface DataCard {
   id: string;
   title: string;
-  chartType: 'area' | 'candlestick' | 'line';
   symbol?: string; // e.g., 'BTCUSDT'
   timeframe?: string; // e.g., '1h', '4h', '1d'
   useGlobalTimeframe?: boolean; // Whether to use global timeframe or individual
@@ -12,7 +11,6 @@ export interface DataCard {
 
 export interface DataCardCreateInput {
   title: string;
-  chartType: 'area' | 'candlestick' | 'line';
   symbol?: string;
   timeframe?: string;
   useGlobalTimeframe?: boolean;

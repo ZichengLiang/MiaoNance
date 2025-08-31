@@ -104,7 +104,7 @@ export default function LoginPage() {
         Login
         </button>
 
-        {/* Social Auth */}
+        {/* Social auth */}
         <div className="mt-6 text-center text-sm text-gray-400">or continue with</div>
         <SocialAuth mode="login" />
 

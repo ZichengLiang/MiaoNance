@@ -1,7 +1,7 @@
 'use client'
 // components/DataCard.tsx
 import React from "react";
-import { PriceVolumeChart } from "@/components/PriceVolumeChart";
+// import { PriceVolumeChart } from "@/components/PriceVolumeChart";
 import { DataCard as DataCardType } from "@/types/dataCard";
 import { PencilIcon, TrashIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 
@@ -87,12 +87,16 @@ const DataCard: React.FC<DataCardProps> = ({ card, className, globalTimeframe, o
       </div>
 
       {/* Chart Area */}
-      <div className="h-64 w-full p-3">
-        <PriceVolumeChart 
+      <div className="h-64 w-full p-3 flex items-center justify-center bg-gray-50">
+        {/* <PriceVolumeChart 
           data={card.data}
           timeframe={effectiveTimeframe}
           symbol={card.symbol}
-        />
+        /> */}
+        <div className="text-gray-500 text-center">
+          <div className="text-lg font-medium">Chart Placeholder</div>
+          <div className="text-sm">{card.symbol} - {effectiveTimeframe}</div>
+        </div>
       </div>
 
       {children && <div className="px-4 pb-3 text-sm text-gray-600">{children}</div>}

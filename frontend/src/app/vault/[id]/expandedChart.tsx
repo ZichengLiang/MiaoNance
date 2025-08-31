@@ -1,10 +1,11 @@
 'use client'
 import React, { useState } from "react";
-import { PriceVolumeChart } from "@/components/PriceVolumeChart";
+// import { PriceVolumeChart } from "@/components/PriceVolumeChart";
 import { DataCard } from "@/types/dataCard";
 import { Note, ChartMark } from "@/types/note";
 import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { v4 as uuidv4 } from "uuid";
 import NotesGrid from "./notesGrid";
 
 interface ExpandedChartProps {
@@ -61,7 +62,7 @@ export default function ExpandedChart({ card, onClose }: ExpandedChartProps) {
     } else {
       // Create new note
       const newNote: Note = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         title: newNoteTitle,
         content: newNoteContent,
         symbol: card.symbol || card.title,
@@ -106,14 +107,19 @@ export default function ExpandedChart({ card, onClose }: ExpandedChartProps) {
       <div className="h-[calc(100vh-4rem)] flex flex-col">
         {/* Upper Half - Chart */}
         <div className="flex-1 min-h-0 p-6">
-          <div className="h-full bg-white border border-gray-200 rounded-lg shadow-sm">
-            <PriceVolumeChart
+          <div className="h-full bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-center">
+            {/* <PriceVolumeChart
               timeframe={card.useGlobalTimeframe ? undefined : card.timeframe}
               symbol={card.symbol}
               data={card.data}
               marks={marks}
               onAddMark={handleAddMark}
-            />
+            /> */}
+            <div className="text-gray-500 text-center">
+              <div className="text-2xl font-medium">Expanded Chart Placeholder</div>
+              <div className="text-lg mt-2">{card.symbol || card.title}</div>
+              <div className="text-sm mt-1">Chart component temporarily disabled</div>
+            </div>
           </div>
         </div>
 

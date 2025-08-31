@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { DataCard, DataCardCreateInput, DataCardUpdateInput, TIMEFRAMES } from "@/types/dataCard";
+import { symbols } from "@/lib/symbols";
 
 interface DataCardDialogProps {
   open: boolean;
@@ -21,7 +22,6 @@ export default function DataCardDialog({
 }: DataCardDialogProps) {
   const [formData, setFormData] = useState<DataCardCreateInput>({
     title: '', // Keep for backend compatibility but won't show in UI
-    chartType: 'area',
     symbol: '',
     timeframe: '1h',
     useGlobalTimeframe: true
@@ -31,7 +31,6 @@ export default function DataCardDialog({
     if (mode === 'edit' && card) {
       setFormData({
         title: card.title,
-        chartType: card.chartType,
         symbol: card.symbol || '',
         timeframe: card.timeframe || '1h',
         useGlobalTimeframe: card.useGlobalTimeframe ?? true
@@ -39,7 +38,6 @@ export default function DataCardDialog({
     } else {
       setFormData({
         title: '',
-        chartType: 'area',
         symbol: '',
         timeframe: '1h',
         useGlobalTimeframe: true
@@ -79,43 +77,24 @@ export default function DataCardDialog({
               <label htmlFor="symbol" className="block text-sm font-medium text-gray-700 mb-1">
                 Trading Pair *
               </label>
-              <input
+              <select
                 id="symbol"
-                type="text"
                 required
                 autoFocus
                 value={formData.symbol}
                 onChange={(e) => handleChange('symbol', e.target.value)}
-                placeholder="e.g., BTCUSDT, ETHUSDT, ADAUSDT"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="mt-1 text-xs text-gray-500">Enter the trading pair symbol (required)</p>
+              >
+                {symbols?.map(symbol => (
+                  <option key={symbol} value={symbol}>
+                    {symbol}
+                  </option>
+                ))}
+                
+                </select>
+              <p className="mt-1 text-xs text-gray-500">Select the symbol</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="chartType" className="block text-sm font-medium text-gray-700 mb-1">
-                  Chart Type
-                </label>
-                <div className="relative">
-                  <select
-                    id="chartType"
-                    value={formData.chartType}
-                    onChange={(e) => handleChange('chartType', e.target.value)}
-                    className="appearance-none w-full px-3 py-2 pr-8 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="area">Area Chart</option>
-                    <option value="candlestick">Candlestick</option>
-                    <option value="line">Line Chart</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
             
             <div className="space-y-2">
               <label className="flex items-center">

@@ -1,6 +1,7 @@
 import React from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { NotebookMetadata } from "@/types/notebook_metadata";
+import { v4 as uuidv4 } from "uuid";
 
 interface VaultControlProps {
   notebooks: NotebookMetadata[];
@@ -18,7 +19,7 @@ export default function VaultControl({
       title: "untitled",
       createdAt: new Date(timestamp),
       updatedAt: new Date(timestamp),
-      uuid: crypto.randomUUID(),
+      uuid: uuidv4(),
     };
     const newArr: NotebookMetadata[] = [...notebooks, newNotebookMetadata];
     setNotebooks(newArr);

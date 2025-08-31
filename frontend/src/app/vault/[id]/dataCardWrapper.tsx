@@ -4,61 +4,26 @@ import DataCard from "./dataCard";
 import DataCardDialog from "./dataCardDialog";
 import { DataCard as DataCardType, DataCardCreateInput, DataCardUpdateInput, TIMEFRAMES } from "@/types/dataCard";
 import { PlusIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { v4 as uuidv4 } from "uuid";
+import { NotebookMetadata } from "@/types/notebook_metadata";
 
 interface DataCardWrapperProps {
-  notebookId: string; // Notebook ID for localStorage key
+  notebooks: NotebookMetadata[]
   onExpandCard?: (card: DataCardType) => void;
+  onSymbolChange?: (symbol: string) => void; // Notify parent about symbol changes
 }
 
-export default function DataCardWrapper({ notebookId, onExpandCard }: DataCardWrapperProps) {
+export default function DataCardWrapper({ notebooks, onExpandCard, onSymbolChange }: DataCardWrapperProps) {
   const [cards, setCards] = useState<DataCardType[]>([]);
   const [globalTimeframe, setGlobalTimeframe] = useState<string>('1h');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [editingCard, setEditingCard] = useState<DataCardType | undefined>();
 
-  // Load cards from localStorage on mount
-  useEffect(() => {
-    const storageKey = `notebook-${notebookId}-cards`;
-    const savedCards = localStorage.getItem(storageKey);
-    if (savedCards) {
-      try {
-        const parsedCards: DataCardType[] = JSON.parse(savedCards).map((card: any) => ({
-          ...card,
-          createdAt: new Date(card.createdAt),
-          updatedAt: new Date(card.updatedAt),
-        }));
-        setCards(parsedCards);
-      } catch (error) {
-        console.error('Failed to parse saved cards:', error);
-        setCards([]);
-      }
-    }
-  }, [notebookId]);
-
-  // Save cards to localStorage whenever cards change
-  useEffect(() => {
-    try {
-      const storageKey = `notebook-${notebookId}-cards`;
-      localStorage.setItem(storageKey, JSON.stringify(cards));
-    } catch (error) {
-      console.error('Failed to save cards to localStorage:', error);
-    }
-  }, [cards, notebookId]);
-
-  // Calculate grid layout - max 2 columns
+  // Layout controllers
   const cardCount = cards.length;
-  
-  // Always use max 2 columns, scroll when more than 2 rows (4 cards)
-  const getGridClass = () => {
-    if (cardCount === 0) return '';
-    if (cardCount === 1) return 'grid-cols-1';
-    return 'grid-cols-1 md:grid-cols-2';
-  };
-
-  const gridClass = getGridClass();
   const shouldScroll = cardCount > 4;
-
+  
   // CRUD Operations
   const handleAddCard = () => {
     setDialogMode('create');
@@ -79,11 +44,12 @@ export default function DataCardWrapper({ notebookId, onExpandCard }: DataCardWr
   };
 
   const handleSaveCard = (data: DataCardCreateInput | DataCardUpdateInput) => {
+    // TODO: Seems that the changes were not applied to notebooks state from page.tsx
+    // this caused a series of bugs, fix it
     if (dialogMode === 'create') {
       const newCard: DataCardType = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         title: data.symbol || 'Unnamed Chart', // Auto-generate from symbol
-        chartType: (data as DataCardCreateInput).chartType,
         symbol: data.symbol,
         timeframe: data.timeframe,
         useGlobalTimeframe: data.useGlobalTimeframe ?? true,
@@ -150,7 +116,7 @@ export default function DataCardWrapper({ notebookId, onExpandCard }: DataCardWr
                   <select
                     value={globalTimeframe}
                     onChange={(e) => handleGlobalTimeframeChange(e.target.value)}
-                    className="appearance-none bg-gray-700 border border-gray-600 text-gray-200 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    className="appearance-none bg-gray-700 border border-gray-600 text-gray-200 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     {TIMEFRAMES.map((tf) => (
                       <option key={tf.value} value={tf.value}>
@@ -168,7 +134,7 @@ export default function DataCardWrapper({ notebookId, onExpandCard }: DataCardWr
                 {individualCards > 0 && (
                   <button
                     onClick={syncAllToGlobal}
-                    className="px-3 py-2 text-sm font-medium text-blue-400 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                    className="px-3 py-2 text-sm font-medium text-blue-400 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                   >
                     Sync All
                   </button>
@@ -215,7 +181,7 @@ export default function DataCardWrapper({ notebookId, onExpandCard }: DataCardWr
                 scrollbarColor: '#6b7280 #374151',
               } : {}}
             >
-              <div className={`grid ${gridClass} gap-6 ${shouldScroll ? 'pb-4' : ''} h-full`}>
+              <div className={`grid grid-cols-2 gap-6 ${shouldScroll ? 'pb-4' : ''} h-full`}>
                 {cards.map((card) => (
                   <DataCard
                     key={card.id}
