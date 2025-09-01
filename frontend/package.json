@@ -10,12 +10,9 @@
     "test": "jest"
   },
   "dependencies": {
-    "@binance/connector-typescript": "^0.3.16",
     "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
-    "@next/swc-darwin-arm64": "^15.4.6",
     "@types/uuid": "^10.0.0",
-    "heroicons": "^2.2.0",
     "lightweight-charts": "^5.0.8",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
