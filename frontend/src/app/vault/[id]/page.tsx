@@ -13,7 +13,7 @@ export default function Page() {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC');
 
   return (
-    <div className="h-screen relative overflow-hidden">
+    <div className="max-h-full relative overflow-hidden ">
       {/* Expanded Chart Overlay */}
       {expandedCard && (
         <ExpandedChart 

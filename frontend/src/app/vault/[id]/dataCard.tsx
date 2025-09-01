@@ -15,20 +15,18 @@ interface DataCardProps {
   children?: React.ReactNode;
 }
 
-const DataCard: React.FC<DataCardProps> = ({ card, className, globalTimeframe, onEdit, onDelete, onExpand, children }) => {
+const DataCard: React.FC<DataCardProps> = ({ card, globalTimeframe, onEdit, onDelete, onExpand, children }) => {
   // Get the effective timeframe for this card
   const effectiveTimeframe = card.useGlobalTimeframe ? globalTimeframe : (card.timeframe || globalTimeframe);
   return (
     <div
-      className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden relative group ${
-        className || ""
-      }`}
+      className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden relative group`}
     >
       {/* Card Header with Trading Pair and Controls */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         {/* Left side - Trading Pair */}
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-bold text-gray-800">
+        <div className="flex items-center gap-2 w-18 flex-shrink-0">
+          <h3 className="text-lg font-bold text-gray-800 truncate">
             {card.symbol || 'No Symbol'}
           </h3>
         </div>

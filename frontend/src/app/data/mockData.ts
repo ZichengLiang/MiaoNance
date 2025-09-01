@@ -17,3 +17,7 @@ export const mockUIKlines: string =
     "0"                 
   ]
 ]`
+
+export const backupSymbols: string[] = 
+  ["---", "BTC", "ETH", "SOL", "BNB", "DOGE"]
+  

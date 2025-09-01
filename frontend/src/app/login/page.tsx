@@ -97,8 +97,8 @@ export default function LoginPage() {
         disabled={isDisabled}
         className={`w-full py-2 px-4 rounded transition
             ${isDisabled
-            ? 'bg-gray-400 cursor-not-allowed text-white'
-            : 'bg-black text-white hover:bg-gray-900 shadow-none transition-shadow duration-150 cursor-pointer hover:shadow-md hover:shadow-black'
+            ? '-400 cursor-not-allowed text-white'
+            : 'bg-black text-white hover:-900 shadow-none transition-shadow duration-150 cursor-pointer hover:shadow-md hover:shadow-black'
             }`}
         >
         Login

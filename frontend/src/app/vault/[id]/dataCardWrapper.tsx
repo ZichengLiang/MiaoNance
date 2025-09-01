@@ -19,10 +19,7 @@ export default function DataCardWrapper({ notebooks, onExpandCard, onSymbolChang
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [editingCard, setEditingCard] = useState<DataCardType | undefined>();
-
-  // Layout controllers
-  const cardCount = cards.length;
-  const shouldScroll = cardCount > 4;
+  const [shouldScroll, setShouldScroll] = useState(false);
   
   // CRUD Operations
   const handleAddCard = () => {
@@ -94,9 +91,13 @@ export default function DataCardWrapper({ notebooks, onExpandCard, onSymbolChang
   // Get count of cards using global vs individual timeframes
   const globalCards = cards.filter(card => card.useGlobalTimeframe).length;
   const individualCards = cards.length - globalCards;
+  
+  React.useEffect(() => {
+    setShouldScroll(cards.length > 4)
+  }, [cards])
 
   return (
-    <div className="w-full h-full flex flex-col p-4 bg-gray-900">
+    <div className="w-full h-full flex flex-col p-4 ">
       <header className="border border-gray-700 rounded-xl p-6 mb-6 bg-gray-800 shadow-sm flex-shrink-0">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
@@ -154,15 +155,14 @@ export default function DataCardWrapper({ notebooks, onExpandCard, onSymbolChang
         </div>
       </header>
       
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 p-4">
         {cards.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center border-2 border-dashed border-gray-600 rounded-xl bg-gray-800">
+          <div className="flex-1 flex items-center p-4 justify-center border-2 border-dashed border-gray-600 rounded-xl bg-gray-800">
             <div className="text-center text-gray-400">
             <div className="mb-4">
                 <ClockIcon className="w-12 h-12 text-gray-500 mx-auto" />
             </div>
               <p className="text-lg mb-2 text-gray-300">No trading pairs added yet</p>
-              <p className="text-sm mb-6 text-gray-500">Add your first trading pair to start analyzing crypto data</p>
             <button
               onClick={handleAddCard}
               className="inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
@@ -173,15 +173,11 @@ export default function DataCardWrapper({ notebooks, onExpandCard, onSymbolChang
             </div>
           </div>
         ) : (
-          <div className="relative flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <div 
-              className={`flex-1 ${shouldScroll ? 'overflow-y-auto' : ''} ${shouldScroll ? 'pr-2 custom-scrollbar' : ''}`}
-              style={shouldScroll ? {
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#6b7280 #374151',
-              } : {}}
+              className={"flex-1 overflow-y-auto custom-scrollbar"}
             >
-              <div className={`grid grid-cols-2 gap-6 ${shouldScroll ? 'pb-4' : ''} h-full`}>
+              <div className={"flex flex-wrap gap-6 p-1"}>
                 {cards.map((card) => (
                   <DataCard
                     key={card.id}

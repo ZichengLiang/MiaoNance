@@ -145,7 +145,7 @@ export default function RegisterPage() {
         className={`w-full py-2 px-4 rounded transition
             ${isDisabled
             ? 'bg-gray-400 cursor-not-allowed text-white'
-            : 'bg-black text-white hover:bg-gray-900 shadow-none transition-shadow duration-150 cursor-pointer hover:shadow-md hover:shadow-black'
+            : 'bg-black text-white hover: shadow-none transition-shadow duration-150 cursor-pointer hover:shadow-md hover:shadow-black'
             }`}
         >
         Register
